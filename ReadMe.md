@@ -1,41 +1,41 @@
 # Assistant Jurisprudence Islamique (RAG)
 
-Application d'intelligence artificielle basee sur le RAG (Retrieval-Augmented Generation) permettant de repondre aux questions de jurisprudence islamique (Fiqh) a partir de livres de reference comme Al-Akhdari, Risala et Ibn Ashir.
+Application d'intelligence artificielle basée sur le RAG (Retrieval-Augmented Generation) permettant de répondre aux questions de jurisprudence islamique (Fiqh) à partir de livres de référence comme Al-Akhdari, Risala et Ibn Ashir.
 
-## Fonctionnalites
+## Fonctionnalités
 
-- Charge et analyse plusieurs fichiers PDF.
-- Combine la recherche par mots-cles (BM25) et la recherche semantique.
-- Cite les sources avec le livre et la page.
-- Propose une interface de chat avec memoire de conversation.
-- Sauvegarde la base vectorielle pour accelerer les prochains lancements.
+- Multi-livres : charge et analyse plusieurs fichiers PDF simultanément.
+- Retriever hybride : combine la recherche par mots-clés (BM25) et la recherche sémantique.
+- Citations de sources : l'IA précise le livre et la page d'où provient l'information.
+- Interface chat : interface utilisateur moderne avec mémoire de conversation.
+- Persistance : la base vectorielle est sauvegardée pour un chargement instantané.
 
 ## Installation
 
-1. Cloner le projet
+### 1. Cloner le projet
 
 ```bash
 git clone https://github.com/IbrahimaKhalil/fiq_islamique-.git
-cd jurisprudence_islamique
+cd fiq islamique
 ```
 
-2. Installer les dependances
+### 2. Installer les dépendances
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Configurer la cle API
+### 3. Configurer la clé API
 
-Cree un fichier `.env` a la racine du projet :
+Crée un fichier `.env` à la racine du projet :
 
 ```env
 GROQ_API_KEY=ta_cle_groq_ici
 ```
 
-Tu peux obtenir une cle gratuite sur `console.groq.com`.
+Obtiens ta clé gratuite sur `console.groq.com`.
 
-4. Ajouter tes livres
+### 4. Ajouter tes livres
 
 Place tes fichiers PDF dans le dossier `livres/`.
 
@@ -45,6 +45,7 @@ Exemple :
 livres/
 Akhdari.pdf
 Risala.pdf
+...
 ```
 
 ## Lancement
@@ -59,44 +60,46 @@ L'application sera accessible sur `http://localhost:8501`.
 
 ```text
 cours_rag_langchain/
-livres/
-chroma_db/
-app.py
-requirements.txt
-.env
-.gitignore
+livres/            Tes livres PDF
+chroma_db/         Base vectorielle (auto-générée)
+app.py             Application principale
+requirements.txt   Dépendances Python
+.env               Clé API (non commitée)
+.gitignore         Fichiers exclus de Git
 ```
 
-## Fonctionnement
+## Comment ça fonctionne
 
-Le systeme suit les etapes suivantes :
+Le fonctionnement suit ces étapes :
 
-1. Les PDF sont decoupes en morceaux.
+1. Les PDF sont découpés en morceaux.
 2. Les morceaux sont convertis en embeddings.
-3. Les donnees sont stockees dans ChromaDB.
+3. Les données sont stockées dans ChromaDB.
 4. Le retriever hybride retrouve les passages pertinents.
-5. Le modele Groq genere une reponse a partir des extraits trouves.
+5. Le modèle Groq génère une réponse à partir des extraits trouvés.
 
-## Technologies utilisees
+## Technologies utilisées
 
-- LangChain pour l'orchestration du pipeline RAG.
-- ChromaDB pour la base de donnees vectorielle.
-- HuggingFace pour les embeddings (`all-MiniLM-L6-v2`).
-- Groq avec Llama 3.1 pour la generation des reponses.
-- Streamlit pour l'interface utilisateur.
-- BM25 pour la recherche par mots-cles.
+| Technologie | Rôle |
+| --- | --- |
+| LangChain | Orchestration du pipeline RAG |
+| ChromaDB | Base de données vectorielle |
+| HuggingFace | Embeddings (`all-MiniLM-L6-v2`) |
+| Groq (Llama 3.1) | Génération de réponses rapide |
+| Streamlit | Interface utilisateur |
+| BM25 | Recherche par mots-clés |
 
-## Deploiement
+## Déploiement
 
-L'application peut etre deployee gratuitement sur Streamlit Cloud.
+L'application est déployable gratuitement sur Streamlit Cloud :
 
 1. Pousse ton code sur GitHub.
-2. Connecte ton depot a Streamlit Cloud.
+2. Connecte ton dépôt sur `share.streamlit.io`.
 3. Ajoute `GROQ_API_KEY` dans les secrets de l'application.
-4. Lance le deploiement.
+4. Clique sur Deploy.
 
 ## Avertissement
 
-Cette application est un outil d'aide a la comprehension. Les reponses sont basees uniquement sur les livres fournis. Pour toute question religieuse importante, consulte un erudit qualifie.
+Cette application est un outil d'aide à la compréhension. Les réponses sont basées uniquement sur les livres fournis. Pour toute question religieuse importante, consulte un érudit qualifié.
 
-Developpe avec coeur dans le cadre d'un projet d'etude sur le Fiqh Malekite.
+Développé avec cœur dans le cadre d'un projet d'étude sur le Fiqh Malékite.
