@@ -1,0 +1,47 @@
+# Core LangChain
+langchain
+langchain-core
+langchain-community
+langchain-text-splitters
+langchain-chroma
+langchain-huggingface
+
+# LLM providers
+langchain-openai
+langchain-groq
+openai
+groq
+
+# Embeddings
+sentence-transformers
+
+# Vector databases
+faiss-cpu
+chromadb
+
+# Hybrid search
+rank_bm25
+
+
+# Token management
+tiktoken
+
+# Environment variables
+python-dotenv
+
+# Document loaders
+pypdf
+
+# Web framework
+fastapi
+uvicorn
+streamlit
+# Utilities
+pydantic
+requests
+tqdm
+
+# Data tools
+numpy
+pandas
+torchdivision 
