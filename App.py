@@ -35,7 +35,7 @@ load_dotenv()
 # ⚙️ MOTEUR RAG
 # ============================================================
 class AlAkhdariEngine:
-    def __init__(self, model_name="llama-3.1-8b-instant"):
+    def __init__(self, model_name="llama3-8b-8192"):
         self.model_name = model_name
         self.persist_db = "./chroma_db"
 
