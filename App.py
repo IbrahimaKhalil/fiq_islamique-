@@ -98,7 +98,7 @@ class AlAkhdariEngine:
         # Configuration du retriever hybride
         bm25 = BM25Retriever.from_documents(chunks)
         bm25.k = 5
-        vector_ret = vectorstore.as_retriever(search_kwargs={"k": 5})
+        vector_ret = vectorstore.as_retriever(search_kwargs={"k": 6})
         
         self.retriever = EnsembleRetriever(
             retrievers=[bm25, vector_ret], 
@@ -150,13 +150,15 @@ st.caption("Expert RAG basé qui aide à répondre sur les questions religieuses
 
 # MODIFICATION : Cache optimisé pour éviter l'erreur de récursion
 @st.cache_resource(show_spinner="Initialisation de l'expert et des textes...")
-def load_al_akhdari_bot():
+def load_al_akhdari_bot(_pdf_list):
     bot = AlAkhdariEngine()
     bot.setup_rag()
     return bot
 
 try:
-    bot = load_al_akhdari_bot()
+    # Le cache se recrée si la liste de PDFs change
+    pdf_list = tuple(sorted(glob.glob("livres/*.pdf")))
+    bot = load_al_akhdari_bot(pdf_list)
 except Exception as e:
     st.error(f"Erreur fatale : {e}")
     st.stop()
