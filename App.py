@@ -145,7 +145,7 @@ CONTEXTE DE RÉFÉRENCE :
 # ============================================================
 st.set_page_config(page_title="Ma Deen", page_icon="🌙", layout="centered")
 st.title("🌙 Assistant Islamique")
-st.caption("Expert RAG basé qui aide à répondre sur les questions religieusese en se basant sur des textes fiables(Coran etc )")
+st.caption("Expert RAG basé qui aide à répondre sur les questions religieuses en se basant sur des textes fiables(Coran etc )")
 
 
 # MODIFICATION : Cache optimisé pour éviter l'erreur de récursion
