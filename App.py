@@ -35,7 +35,7 @@ load_dotenv()
 # ⚙️ MOTEUR RAG
 # ============================================================
 class AlAkhdariEngine:
-    def __init__(self, model_name="llama3-8b-8192"):
+    def __init__(self, model_name="llama-3.1-8b-instant"):
         self.model_name = model_name
         self.persist_db = "./chroma_db"
 
@@ -107,33 +107,48 @@ class AlAkhdariEngine:
         self._build_chain()
 
     def _build_chain(self):
-        """Construit la chaîne de traitement LangChain"""
-        system_instruction = """Tu es un expert rigoureux en jurisprudence (Fiqh). 
-Ton but est d'extraire la vérité des textes fournis.
+        # 1. Reformulation de la question selon l'historique
+        rephrase_system_prompt = """Donné un historique et une question, reformule-la pour qu'elle soit autonome.
+        NE RÉPONDS PAS, juste la question reformulée."""
+        
+        rephrase_prompt = ChatPromptTemplate.from_messages([
+            ("system", rephrase_system_prompt),
+            MessagesPlaceholder(variable_name="history"),
+            ("human", "{question}"),
+        ])
+        rephrase_chain = rephrase_prompt | self.llm | StrOutputParser()
 
-CONSIGNES DE SÉCURITÉ :
-1. Si l'information est présente : Réponds de manière concise et cite [Livre, Page] après chaque affirmation importante.
-2. Si l'information est floue : Précise que le texte est ambigu et donne l'interprétation la plus proche.
-3. Si l'information est ABSENTE : Dis "Je n'ai trouvé aucune mention de cela dans mes livres." NE RÉPONDS PAS avec tes propres connaissances.
+        # 2. Prompt de réponse final (Comportement Naturel)
+        system_instruction = """Tu es un assistant amical, bienveillant et expert en jurisprudence islamique (Fiqh).
 
-CONTEXTE DE RÉFÉRENCE :
-{context}"""
+        CONSIGNES DE COMPORTEMENT :
+        1. Salutations et politesse : Si l'utilisateur te salue (ex: "Salam", "Bonjour") ou te remercie, réponds naturellement et chaleureusement sans chercher dans tes documents.
+        2. Questions de Fiqh TROUVÉES : Si la réponse est dans le contexte fourni, réponds clairement et cite la source [Livre, Page].
+        3. Questions HORS-SUJET ou ABSENTES : Si la question n'est pas dans tes textes, ne sois pas froid. Explique poliment et gentiment que ton rôle se limite aux livres qui t'ont été fournis (comme Al-Akhdari) et que tu ne trouves pas la réponse dedans. Ne donne jamais d'avis personnel ou de fatwa inventée.
 
-        prompt = ChatPromptTemplate.from_messages([
+        CONTEXTE DE RECHERCHE : 
+        {context}"""
+
+        qa_prompt = ChatPromptTemplate.from_messages([
             ("system", system_instruction),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{question}")
         ])
 
-        self.chain = (
-            {
-                "context": RunnableLambda(lambda x: self._format_docs(self.retriever.invoke(x["question"]))),
-                "question": RunnablePassthrough() | RunnableLambda(lambda x: x["question"]),
-                "history": RunnablePassthrough() | RunnableLambda(lambda x: x["history"]),
-            }
-            | prompt | self.llm | StrOutputParser()
-        )
+        def contextualize(input_data):
+            if input_data.get("history"):
+                return rephrase_chain.invoke(input_data)
+            return input_data["question"]
 
+        self.chain = (
+            RunnablePassthrough.assign(contextualized_q=RunnableLambda(contextualize))
+            | {
+                "context": lambda x: self._format_docs(self.retriever.invoke(x["contextualized_q"])),
+                "question": lambda x: x["question"],
+                "history": lambda x: x["history"],
+            }
+            | qa_prompt | self.llm | StrOutputParser()
+        )
     def ask(self, question, history=[]):
         if not self.chain:
             raise ValueError("Moteur non initialisé.")
