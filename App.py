@@ -86,16 +86,14 @@ class AlAkhdariEngine:
             chunk_size=1200, chunk_overlap=150
         ).split_documents(docs)
 
-        # Utilisation de la base vectorielle
+        # Recréer la base vectorielle à chaque démarrage pour inclure tous les livres
         if os.path.exists(self.persist_db):
-            vectorstore = Chroma(
-                persist_directory=self.persist_db,
-                embedding_function=self.embeddings
-            )
-        else:
-            vectorstore = Chroma.from_documents(
-                chunks, self.embeddings, persist_directory=self.persist_db
-            )
+            import shutil
+            shutil.rmtree(self.persist_db)
+
+        vectorstore = Chroma.from_documents(
+            chunks, self.embeddings, persist_directory=self.persist_db
+        )
 
         # Configuration du retriever hybride
         bm25 = BM25Retriever.from_documents(chunks)
