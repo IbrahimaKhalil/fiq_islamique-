@@ -8,7 +8,9 @@ langchain-groq
 sentence-transformers
 pypdf
 chromadb>=0.5.0
-protobuf>=4.25.3
+protobuf>=5.26.0
+opentelemetry-proto>=1.25.0
+opentelemetry-exporter-otlp-proto-grpc>=1.25.0
 python-dotenv
 rank_bm25
 numpy
