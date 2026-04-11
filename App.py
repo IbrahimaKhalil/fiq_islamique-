@@ -146,8 +146,9 @@ CONTEXTE DE RÉFÉRENCE :
 # INTERFACE STREAMLIT
 # ============================================================
 st.set_page_config(page_title="Ma Deen", page_icon="🌙", layout="centered")
-st.title("🌙 Assistant Jurisprudence Islamique")
-st.caption("Expert RAG basé sur les textes classiques de Fiqh")
+st.title("🌙 Assistant Islamique")
+st.caption("Expert RAG basé qui aide à répondre sur les questions religieusese en se basant sur des textes fiables(Coran etc )")
+
 
 # MODIFICATION : Cache optimisé pour éviter l'erreur de récursion
 @st.cache_resource(show_spinner="Initialisation de l'expert et des textes...")
@@ -190,7 +191,7 @@ if prompt := st.chat_input("Posez votre question..."):
                 st.session_state.messages.append({"role": "assistant", "content": response})
                 
                 if len(st.session_state.chat_history) > 10:
-                    st.session_state.chat_history = st.session_state.chat_history[-10:]
+                    st.session_state.chat_history = st.session_state.chat_history[10:]
                     
             except Exception as e:
                 st.error(f"Erreur : {e}")
