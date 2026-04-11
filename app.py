@@ -4,14 +4,11 @@ import warnings
 import logging
 import streamlit as st
 from dotenv import load_dotenv
-import warnings
-import os
 
-# Bloque les avertissements de dépréciation (les messages orange/jaune)
+# --- CONFIGURATION INITIALE ---
+# Bloque les avertissements de dépréciation et les logs bavards de Hugging Face
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-# Bloque les messages de logs de Hugging Face
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # LangChain Imports
@@ -24,13 +21,11 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.retrievers import BM25Retriever
-# CORRECTION IMPORT : On utilise l'import standard de langchain
-from langchain_classic.retrievers.ensemble import EnsembleRetriever
-
+# MODIFICATION : Import standard et robuste
+from langchain_classic.retrievers.ensemble import EnsembleRetriever 
 from langchain_core.messages import HumanMessage, AIMessage
 
-# Configuration des logs et warnings
-warnings.filterwarnings("ignore")
+# Configuration des logs
 logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 load_dotenv()
@@ -76,7 +71,7 @@ class AlAkhdariEngine:
         """Initialise la base de données et le retriever hybride"""
         pdf_files = glob.glob(data_path)
         if not pdf_files:
-            st.error(f"⚠️ Aucun PDF trouvé dans le dossier '{data_path}'.")
+            st.error(f"⚠️ Aucun PDF trouvé dans le dossier '{data_path}'. Vérifiez votre dépôt GitHub.")
             st.stop()
 
         docs = []
@@ -90,7 +85,7 @@ class AlAkhdariEngine:
             chunk_size=1200, chunk_overlap=150
         ).split_documents(docs)
 
-        # Gestion de la base vectorielle persistante
+        # Utilisation de la base vectorielle
         if os.path.exists(self.persist_db):
             vectorstore = Chroma(
                 persist_directory=self.persist_db,
@@ -101,7 +96,7 @@ class AlAkhdariEngine:
                 chunks, self.embeddings, persist_directory=self.persist_db
             )
 
-        # Configuration du retriever hybride (Sémantique + Mots-clés)
+        # Configuration du retriever hybride
         bm25 = BM25Retriever.from_documents(chunks)
         bm25.k = 5
         vector_ret = vectorstore.as_retriever(search_kwargs={"k": 5})
@@ -141,9 +136,8 @@ CONTEXTE DE RÉFÉRENCE :
         )
 
     def ask(self, question, history=[]):
-        """Invoque la chaîne pour obtenir une réponse"""
         if not self.chain:
-            raise ValueError("Moteur non initialisé. Appelez setup_rag().")
+            raise ValueError("Moteur non initialisé.")
         return self.chain.invoke({"question": question, "history": history})
 
 
@@ -154,14 +148,18 @@ st.set_page_config(page_title="Al-Akhdari AI", page_icon="🌙", layout="centere
 st.title("🌙 Assistant Jurisprudence Islamique")
 st.caption("Expert RAG basé sur les textes classiques de Fiqh")
 
-@st.cache_resource
-def get_bot():
-    """Charge le bot une seule fois et le garde en mémoire cache"""
+# MODIFICATION : Cache optimisé pour éviter l'erreur de récursion
+@st.cache_resource(show_spinner="Initialisation de l'expert et des textes...")
+def load_al_akhdari_bot():
     bot = AlAkhdariEngine()
     bot.setup_rag()
     return bot
 
-bot = get_bot()
+try:
+    bot = load_al_akhdari_bot()
+except Exception as e:
+    st.error(f"Erreur fatale : {e}")
+    st.stop()
 
 # Initialisation de l'historique
 if "messages" not in st.session_state:
@@ -169,13 +167,13 @@ if "messages" not in st.session_state:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# Affichage des messages
+# Affichage
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Entrée utilisateur
-if prompt := st.chat_input("Posez votre question sur la prière, les ablutions, etc."):
+# Chat Input
+if prompt := st.chat_input("Posez votre question..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -186,21 +184,19 @@ if prompt := st.chat_input("Posez votre question sur la prière, les ablutions, 
                 response = bot.ask(prompt, st.session_state.chat_history)
                 st.markdown(response)
                 
-                # Mise à jour de l'historique technique et d'affichage
                 st.session_state.chat_history.append(HumanMessage(content=prompt))
                 st.session_state.chat_history.append(AIMessage(content=response))
                 st.session_state.messages.append({"role": "assistant", "content": response})
                 
-                # Limitation de l'historique pour ne pas saturer le contexte
                 if len(st.session_state.chat_history) > 10:
                     st.session_state.chat_history = st.session_state.chat_history[-10:]
                     
             except Exception as e:
-                st.error(f"❌ Une erreur est survenue : {e}")
+                st.error(f"❌ Erreur : {e}")
 
-# Barre latérale d'outils
+# Barre latérale
 with st.sidebar:
-    st.header("Paramètres")
+    st.header("Options")
     if st.button("🗑️ Effacer la discussion"):
         st.session_state.messages = []
         st.session_state.chat_history = []
