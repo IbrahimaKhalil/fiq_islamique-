@@ -22,7 +22,8 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.retrievers import BM25Retriever
 # MODIFICATION : Import standard et robuste
-from langchain_classic.retrievers.ensemble import EnsembleRetriever 
+from langchain_classic.retrievers.ensemble import EnsembleRetriever
+
 from langchain_core.messages import HumanMessage, AIMessage
 
 # Configuration des logs
@@ -48,7 +49,7 @@ class AlAkhdariEngine:
         self.api_key = api_key_secret or os.getenv("GROQ_API_KEY")
 
         if not self.api_key:
-            raise ValueError("🚨 Clé API GROQ introuvable. Vérifiez vos secrets.")
+            raise ValueError(" Clé API GROQ introuvable. Vérifiez vos secrets.")
 
         # Modèle d'embeddings multilingue
         self.embeddings = HuggingFaceEmbeddings(
@@ -64,14 +65,14 @@ class AlAkhdariEngine:
         for doc in docs:
             src = doc.metadata.get("source", "Inconnu")
             page = doc.metadata.get("page", 0) + 1
-            formatted.append(f"📖 Extrait de [{src}, Page {page}]:\n{doc.page_content}")
+            formatted.append(f"Extrait de [{src}, Page {page}]:\n{doc.page_content}")
         return "\n\n---\n\n".join(formatted)
 
     def setup_rag(self, data_path="livres/*.pdf"):
         """Initialise la base de données et le retriever hybride"""
         pdf_files = glob.glob(data_path)
         if not pdf_files:
-            st.error(f"⚠️ Aucun PDF trouvé dans le dossier '{data_path}'. Vérifiez votre dépôt GitHub.")
+            st.error(f" Aucun PDF trouvé dans le dossier '{data_path}'. Vérifiez votre dépôt GitHub.")
             st.stop()
 
         docs = []
@@ -142,9 +143,9 @@ CONTEXTE DE RÉFÉRENCE :
 
 
 # ============================================================
-# 🎨 INTERFACE STREAMLIT
+# INTERFACE STREAMLIT
 # ============================================================
-st.set_page_config(page_title="Al-Akhdari AI", page_icon="🌙", layout="centered")
+st.set_page_config(page_title="Ma Deen", page_icon="🌙", layout="centered")
 st.title("🌙 Assistant Jurisprudence Islamique")
 st.caption("Expert RAG basé sur les textes classiques de Fiqh")
 
@@ -192,7 +193,7 @@ if prompt := st.chat_input("Posez votre question..."):
                     st.session_state.chat_history = st.session_state.chat_history[-10:]
                     
             except Exception as e:
-                st.error(f"❌ Erreur : {e}")
+                st.error(f"Erreur : {e}")
 
 # Barre latérale
 with st.sidebar:
